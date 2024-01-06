@@ -18,6 +18,7 @@ namespace ApiMongo.Models
         [BsonElement("produtos")]
         [JsonPropertyName("produtos")]
         public List<Produto>? Produtos { get; set; } = [];
+        public double Total { get; set; }
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         [BsonElement("createdAt")]

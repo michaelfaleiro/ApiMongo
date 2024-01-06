@@ -65,7 +65,11 @@ namespace ApiMongo.Services
                 .Set("produtos.$.NomeProduto", produto.NomeProduto)
                 .Set("produtos.$.Sku", produto.Sku)
                 .Set("produtos.$.Quantidade", produto.Quantidade)
-                .Set("produtos.$.Preco", produto.Preco);
+                .Set("produtos.$.Marca", produto.Marca)
+                .Set("produtos.$.PrecoVenda", produto.PrecoVenda)
+                .Set("produtos.$.Link", produto.Link)
+                .Set("produtos.$.Observacao", produto.Observacao)
+                .Set("produtos.$.PrecoCusto", produto.PrecoCusto);
 
             await _orcamentoCollection.UpdateOneAsync(filter, update);
         }

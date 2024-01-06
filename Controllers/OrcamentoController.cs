@@ -37,7 +37,7 @@ namespace ApiMongo.Controllers
             }
             catch
             {
-                return StatusCode(500);
+                return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
             }
         }
 
@@ -47,6 +47,7 @@ namespace ApiMongo.Controllers
             try
             {
                 var orcamentos = await _orcamentoService.GetAsync();
+
                 return Ok(new ResultViewModel<List<Orcamento>>(orcamentos));
             }
             catch
@@ -59,6 +60,16 @@ namespace ApiMongo.Controllers
         public async Task<ActionResult<Orcamento>> GetByIdAsync(string id)
         {
             var orcamento = await _orcamentoService.GetByIdAsync(id);
+
+            double totalGeral = 0;
+
+            foreach (var item in orcamento.Produtos)
+            {
+                var totalOrcamento = item.Quantidade * item.PrecoVenda;
+                totalGeral += totalOrcamento;
+            }
+
+            orcamento.Total = totalGeral;
             return Ok(new ResultViewModel<Orcamento>(orcamento));
         }
 
@@ -128,8 +139,8 @@ namespace ApiMongo.Controllers
             }
         }
 
-        [HttpDelete("orcamentos/{id:length(24)}/removeproduto")]
-        public async Task<IActionResult> RemoveProdutoAsync(string id, [FromBody] string idProduto)
+        [HttpDelete("orcamentos/{id:length(24)}/{produtoId:length(24)}")]
+        public async Task<IActionResult> RemoveProdutoAsync(string id, string produtoId)
         {
             try
             {
@@ -138,7 +149,7 @@ namespace ApiMongo.Controllers
                 if (result == null)
                     return NotFound(new ResultViewModel<string>("Orçamento não encontrado"));
 
-                await _orcamentoService.RemoveProdutoAsync(id, idProduto);
+                await _orcamentoService.RemoveProdutoAsync(id, produtoId);
                 return NoContent();
             }
             catch
