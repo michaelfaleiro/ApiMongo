@@ -1,7 +1,6 @@
 using ApiMongo.Data;
 using ApiMongo.Models;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Validations;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -68,8 +67,7 @@ namespace ApiMongo.Services
                 .Set("produtos.$.Marca", produto.Marca)
                 .Set("produtos.$.PrecoVenda", produto.PrecoVenda)
                 .Set("produtos.$.Link", produto.Link)
-                .Set("produtos.$.Observacao", produto.Observacao)
-                .Set("produtos.$.PrecoCusto", produto.PrecoCusto);
+                .Set("produtos.$.Observacao", produto.Observacao);
 
             await _orcamentoCollection.UpdateOneAsync(filter, update);
         }

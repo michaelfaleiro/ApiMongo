@@ -5,6 +5,7 @@ using ApiMongo.Services;
 using ApiMongo.ViewsModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace ApiMongo.Controllers
 {
@@ -35,6 +36,10 @@ namespace ApiMongo.Controllers
                 await _orcamentoService.CreateAsync(orcamento);
                 return Created($"api/orcamentos/{orcamento.Id}", new ResultViewModel<Orcamento>(orcamento));
             }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível Salvar os Dados"));
+            }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
@@ -50,6 +55,10 @@ namespace ApiMongo.Controllers
 
                 return Ok(new ResultViewModel<List<Orcamento>>(orcamentos));
             }
+            catch (MongoException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível buscar os dados"));
+            }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
@@ -59,18 +68,31 @@ namespace ApiMongo.Controllers
         [HttpGet("orcamentos/{id:length(24)}")]
         public async Task<ActionResult<Orcamento>> GetByIdAsync(string id)
         {
-            var orcamento = await _orcamentoService.GetByIdAsync(id);
-
-            double totalGeral = 0;
-
-            foreach (var item in orcamento.Produtos)
+            try
             {
-                var totalOrcamento = item.Quantidade * item.PrecoVenda;
-                totalGeral += totalOrcamento;
-            }
+                var orcamento = await _orcamentoService.GetByIdAsync(id);
 
-            orcamento.Total = totalGeral;
-            return Ok(new ResultViewModel<Orcamento>(orcamento));
+                if (orcamento.Produtos is not null)
+                {
+                    double totalGeral = 0;
+                    foreach (var item in orcamento.Produtos)
+                    {
+                        var totalOrcamento = item.Quantidade * item.PrecoVenda;
+                        totalGeral += totalOrcamento;
+                    }
+                    orcamento.Total = totalGeral;
+                }
+
+                return Ok(new ResultViewModel<Orcamento>(orcamento));
+            }
+            catch (MongoException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível buscar os dados"));
+            }
+            catch
+            {
+                return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
+            }
         }
 
         [HttpPut("orcamentos/{id:length(24)}")]
@@ -85,6 +107,10 @@ namespace ApiMongo.Controllers
 
                 await _orcamentoService.UpdateAsync(id, orcamento);
                 return Ok(new ResultViewModel<Orcamento>(orcamento));
+            }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível Atualizar os dados"));
             }
             catch
             {
@@ -113,6 +139,10 @@ namespace ApiMongo.Controllers
                 await _orcamentoService.AddProdutoOrcamentoAsync(id, produto);
                 return NoContent();
             }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Erro ao Adicionar Produto"));
+            }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
@@ -133,6 +163,10 @@ namespace ApiMongo.Controllers
                 await _orcamentoService.AtualizarProdutoOrcamento(id, produtoId, produto);
                 return Ok();
             }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível Atualizar os dados"));
+            }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
@@ -152,6 +186,10 @@ namespace ApiMongo.Controllers
                 await _orcamentoService.RemoveProdutoAsync(id, produtoId);
                 return NoContent();
             }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível Remover os dados"));
+            }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Falha interna no Servidor"));
@@ -165,6 +203,10 @@ namespace ApiMongo.Controllers
             {
                 await _orcamentoService.DeleteAsync(id);
                 return NoContent();
+            }
+            catch (MongoWriteException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível Atualizar os dados"));
             }
             catch
             {

@@ -17,7 +17,6 @@ namespace ApiMongo.Models
         public string Sku { get; set; } = null!;
         public string NomeProduto { get; set; } = null!;
         public string? Marca { get; set; }
-        public double PrecoCusto { get; set; }
         public double PrecoVenda { get; set; }
         public string? Link { get; set; }
         public string? Observacao { get; set; }
